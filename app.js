@@ -15,7 +15,7 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/loginRegisterApp')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/loginRegisterApp')
     .then(() => {
         console.log('Connected to MongoDB');
     })
@@ -30,10 +30,23 @@ app.get('/login', (req, res) => {
     res.render('login');
 });
 
+app.get('/register', (req, res) => {
+    res.render('register');
+});
+
 // Home Route
 app.get('/', (req, res) => {
     res.render('index');
 });
+
+// Dashboard Route
+app.get('/dashboard', (req, res) => {
+    if (!req.session.user || !req.session.user.verified) {
+        return res.redirect('/'); // Redirect to login if not authenticated or verified
+    }
+    res.render('dashboard', { user: req.session.user });
+});
+
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
